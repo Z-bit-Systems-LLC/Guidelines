@@ -7,6 +7,7 @@ This guide provides detailed instructions for using the shared WPF component lib
 - [Design System](#design-system)
 - [Converters](#converters)
 - [Localization](#localization)
+- [Settings Infrastructure](#settings-infrastructure)
 - [Window State Management](#window-state-management)
 - [Theme Management](#theme-management)
 - [Components](#components)
@@ -213,90 +214,95 @@ localizationProvider.ChangeCulture(spanishCulture);
 // All UI elements using {localization:Localize} will update automatically
 ```
 
+## Settings Infrastructure
+
+The library provides a shared settings infrastructure so all Z-bit apps use the same storage pattern.
+
+### UserSettings Base Class
+
+`UserSettings` implements `IWindowStateStorage` directly, eliminating the need for an adapter when using the built-in settings system:
+
+```csharp
+using ZBitSystems.Wpf.UI.Settings;
+
+// Use directly for simple apps
+services.AddSingleton<IUserSettingsService<UserSettings>>(
+    new JsonUserSettingsService<UserSettings>("MyApp"));
+
+// Or extend for app-specific settings
+public class MyAppSettings : UserSettings
+{
+    public string PreferredCulture { get; set; } = "en-US";
+    public bool AutoConnect { get; set; } = true;
+}
+
+services.AddSingleton<IUserSettingsService<MyAppSettings>>(
+    new JsonUserSettingsService<MyAppSettings>("MyApp"));
+```
+
+### JsonUserSettingsService
+
+Persists settings as JSON to `%LOCALAPPDATA%/{appName}/settings.json` (unpackaged) or the package-scoped local folder (MSIX). Settings are loaded synchronously on construction with automatic fallback to defaults.
+
+### DI Registration
+
+```csharp
+// In App.xaml.cs ConfigureServices:
+services.AddSingleton<IUserSettingsService<UserSettings>>(
+    new JsonUserSettingsService<UserSettings>("CredBench"));
+```
+
 ## Window State Management
 
 The window state manager persists window position, size, and maximized state across application sessions.
 
-### Step 1: Implement IWindowStateStorage
+### Recommended: Using UserSettings (No Adapter Needed)
 
-Create a storage adapter for your settings class. This keeps your Core/business logic independent from WPF-specific types:
+Since `UserSettings` already implements `IWindowStateStorage`, you can pass it directly to `WindowStateManager`:
 
 ```csharp
 using ZBitSystems.Wpf.UI.Services;
+using ZBitSystems.Wpf.UI.Settings;
 
-public class UserSettingsWindowStateAdapter : IWindowStateStorage
+public partial class MainWindow : FluentWindow
 {
-    private readonly UserSettings _settings;
+    private readonly IUserSettingsService<UserSettings> _settingsService;
+    private readonly WindowStateManager _windowStateManager;
 
-    public UserSettingsWindowStateAdapter(UserSettings settings)
+    public MainWindow(MainViewModel viewModel, IUserSettingsService<UserSettings> settingsService)
     {
-        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        InitializeComponent();
+        DataContext = viewModel;
+
+        _settingsService = settingsService;
+        // UserSettings IS IWindowStateStorage — no adapter needed
+        _windowStateManager = new WindowStateManager(this, settingsService.Settings);
+        _windowStateManager.RestoreWindowState();
+        Closing += OnClosing;
     }
 
-    public double WindowWidth
+    private async void OnClosing(object? sender, CancelEventArgs e)
     {
-        get => _settings.WindowWidth;
-        set => _settings.WindowWidth = value;
-    }
-
-    public double WindowHeight
-    {
-        get => _settings.WindowHeight;
-        set => _settings.WindowHeight = value;
-    }
-
-    public double? WindowLeft
-    {
-        get => _settings.WindowLeft;
-        set => _settings.WindowLeft = value;
-    }
-
-    public double? WindowTop
-    {
-        get => _settings.WindowTop;
-        set => _settings.WindowTop = value;
-    }
-
-    public bool IsMaximized
-    {
-        get => _settings.IsMaximized;
-        set => _settings.IsMaximized = value;
+        _windowStateManager.SaveWindowState();
+        await _settingsService.SaveAsync();
     }
 }
 ```
 
-### Step 2: Use in Window Constructor
+### Alternative: Adapter Pattern
+
+If your app stores settings in a Core project that cannot reference the Guidelines library, create an adapter in your UI project:
 
 ```csharp
 using ZBitSystems.Wpf.UI.Services;
 
-public partial class MainWindow : Window
+public class SettingsWindowStateAdapter(MySettings settings) : IWindowStateStorage
 {
-    private readonly IUserSettingsService _userSettingsService;
-    private readonly WindowStateManager _windowStateManager;
-
-    public MainWindow(IUserSettingsService userSettingsService)
-    {
-        _userSettingsService = userSettingsService;
-
-        // Create adapter to bridge your settings with the window state manager
-        var adapter = new UserSettingsWindowStateAdapter(userSettingsService.Settings);
-        _windowStateManager = new WindowStateManager(this, adapter);
-
-        InitializeComponent();
-
-        // Restore window state before showing
-        _windowStateManager.RestoreWindowState();
-
-        // Save state when closing
-        Closing += MainWindow_Closing;
-    }
-
-    private async void MainWindow_Closing(object? sender, CancelEventArgs e)
-    {
-        _windowStateManager.SaveWindowState();
-        await _userSettingsService.SaveAsync();
-    }
+    public double WindowWidth { get => settings.WindowWidth; set => settings.WindowWidth = value; }
+    public double WindowHeight { get => settings.WindowHeight; set => settings.WindowHeight = value; }
+    public double? WindowLeft { get => settings.WindowLeft; set => settings.WindowLeft = value; }
+    public double? WindowTop { get => settings.WindowTop; set => settings.WindowTop = value; }
+    public bool IsMaximized { get => settings.IsMaximized; set => settings.IsMaximized = value; }
 }
 ```
 
@@ -443,22 +449,36 @@ See: `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md`
 
 ### Keep Core Projects UI-Independent
 
-When integrating with applications that have a Core/business logic layer:
+Core projects must never reference the Guidelines WPF library. All UI-specific types — including `UserSettings` and its extensions — belong in the UI project.
 
-❌ **Don't:** Make Core types implement WPF interfaces
-```csharp
-// Bad: Creates dependency from Core to WPF library
-public class UserSettings : IWindowStateStorage { }
+```
+Core/           ← No WPF references. Models, services, ViewModels only.
+UI/Windows/     ← References Core + Guidelines. Settings, adapters, views live here.
 ```
 
-✅ **Do:** Create adapters in your UI project
+### Use Guidelines UserSettings in the UI Project
+
+Use or extend `UserSettings` from the Guidelines library in your **UI project** (not Core). This gives you `IWindowStateStorage` for free without adapter boilerplate:
+
 ```csharp
-// Good: Adapter in UI project, Core remains independent
-public class UserSettingsWindowStateAdapter : IWindowStateStorage
+// In UI/Windows project — NOT in Core
+using ZBitSystems.Wpf.UI.Settings;
+
+public class MyAppSettings : UserSettings
 {
-    private readonly UserSettings _settings;
-    // Delegate to Core type
+    public string PreferredCulture { get; set; } = "en-US";
 }
 ```
 
-This keeps your Core project platform-agnostic and testable without UI dependencies.
+### Adapter Pattern for Core-Owned Settings
+
+If your Core project must own a platform-agnostic settings class, create an adapter in the UI project to bridge it with `IWindowStateStorage`:
+
+```csharp
+// Adapter in UI project — Core remains independent
+public class SettingsWindowStateAdapter(CoreSettings settings) : IWindowStateStorage
+{
+    public double WindowWidth { get => settings.WindowWidth; set => settings.WindowWidth = value; }
+    // ...
+}
+```
