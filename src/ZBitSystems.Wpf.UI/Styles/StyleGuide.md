@@ -269,6 +269,33 @@ Templates for common layout patterns.
 - `{DynamicResource TextFillColorSecondaryBrush}` - Secondary text
 - `{DynamicResource ControlFillColorDefaultBrush}` - Control backgrounds
 
+## Controls
+
+### LicenseExpander
+A custom control for displaying license text in an expandable card with monospace formatting.
+
+```xml
+xmlns:controls="clr-namespace:ZBitSystems.Wpf.UI.Controls;assembly=ZBitSystems.Wpf.UI"
+
+<controls:LicenseExpander Header="Apache License 2.0"
+    ResourceUri="pack://application:,,,/Assets/Apache.txt" />
+```
+
+The control uses `ui:CardExpander` for the expandable container and renders license text in `Courier New` inside a `ScrollViewer`.
+
+### InvertEffect
+A pixel shader effect for inverting element colors, typically used to make logos visible in dark mode.
+
+```xml
+xmlns:effects="clr-namespace:ZBitSystems.Wpf.UI.Effects;assembly=ZBitSystems.Wpf.UI"
+
+<Image Source="logo.png">
+    <Image.Effect>
+        <effects:InvertEffect />
+    </Image.Effect>
+</Image>
+```
+
 ## Future Enhancements
 
 ### Planned Additions

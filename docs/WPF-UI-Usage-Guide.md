@@ -5,7 +5,10 @@ This guide provides detailed instructions for using the shared WPF component lib
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Design System](#design-system)
+- [Controls](#controls)
 - [Converters](#converters)
+- [Effects](#effects)
+- [Helpers](#helpers)
 - [Localization](#localization)
 - [Settings Infrastructure](#settings-infrastructure)
 - [Window State Management](#window-state-management)
@@ -70,6 +73,120 @@ The design system provides centralized tokens for spacing, sizing, colors, and t
 - **Typography:** `{StaticResource Text.Title}`, `{StaticResource Text.Body}`, etc.
 
 For detailed token reference, see `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md`.
+
+## Controls
+
+### LicenseExpander
+
+A reusable control that displays license text inside an expandable card. License content can be set directly or loaded from a `pack://` resource URI.
+
+#### Adding Namespace
+
+```xml
+xmlns:controls="clr-namespace:ZBitSystems.Wpf.UI.Controls;assembly=ZBitSystems.Wpf.UI"
+```
+
+#### Basic Usage
+
+Load license text from an embedded resource:
+```xml
+<controls:LicenseExpander Header="Apache License 2.0"
+    ResourceUri="pack://application:,,,/Assets/Apache.txt" />
+```
+
+Set license text directly:
+```xml
+<controls:LicenseExpander Header="MIT License"
+    LicenseText="MIT License text here..." />
+```
+
+Constrain the content height with a scrollable area:
+```xml
+<controls:LicenseExpander Header="EPL License"
+    ResourceUri="pack://application:,,,/Assets/EPL.txt"
+    MaxContentHeight="400" />
+```
+
+#### Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `Header` | `string` | `""` | Header text displayed on the expander |
+| `LicenseText` | `string` | `""` | License content to display |
+| `ResourceUri` | `Uri?` | `null` | Pack URI to auto-load text from a resource |
+| `MaxContentHeight` | `double` | `Infinity` | Maximum height of the scrollable content area |
+
+## Effects
+
+### InvertEffect
+
+A pixel shader effect that inverts the colors of an element. Useful for making dark-on-light images visible in dark mode themes.
+
+#### Adding Namespace
+
+```xml
+xmlns:effects="clr-namespace:ZBitSystems.Wpf.UI.Effects;assembly=ZBitSystems.Wpf.UI"
+```
+
+#### Basic Usage
+
+Apply directly to an element:
+```xml
+<Image Source="logo.png">
+    <Image.Effect>
+        <effects:InvertEffect />
+    </Image.Effect>
+</Image>
+```
+
+Toggle based on dark mode (with ThemeManager):
+```xml
+<Image Source="logo.png">
+    <Image.Style>
+        <Style TargetType="Image">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <effects:InvertEffect />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Image.Style>
+</Image>
+```
+
+## Helpers
+
+### ApplicationInfoHelper
+
+Static helper for reading application metadata from assembly attributes.
+
+```csharp
+using ZBitSystems.Wpf.UI.Helpers;
+
+// Get formatted version string (e.g., "Version 3.0.27")
+string version = ApplicationInfoHelper.GetVersion();
+
+// Get copyright notice from AssemblyCopyrightAttribute
+string copyright = ApplicationInfoHelper.GetCopyright();
+
+// Get product name from AssemblyProductAttribute
+string product = ApplicationInfoHelper.GetProductName();
+```
+
+All methods default to `Assembly.GetEntryAssembly()` (the consuming application's assembly). Pass an explicit assembly to read from a different source:
+
+```csharp
+var assembly = typeof(MyClass).Assembly;
+string version = ApplicationInfoHelper.GetVersion(assembly);
+```
+
+### CopyTextBoxHelper
+
+See existing documentation for copy-to-clipboard attached property.
 
 ## Converters
 

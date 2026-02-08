@@ -11,16 +11,24 @@ This repository contains shared company guidelines and reusable WPF components f
 ### Shared WPF Library (`src/ZBitSystems.Wpf.UI/`)
 A reusable WPF component library providing:
 - **Design System** - Consistent styling and design tokens
+- **Controls** - Reusable custom controls (LicenseExpander)
 - **Converters** - Generic value converters for data binding
+- **Effects** - Pixel shader effects (InvertEffect for dark mode)
 - **Helpers** - Utility classes for common WPF scenarios
 - **Localization** - Interface-based abstraction for multi-language support
 - **Window Management** - State persistence with multi-monitor support
 - **Theme Management** - Automatic Windows system theme following
 - Built on WPF-UI 4.2.0
 - Targets .NET 10.0-windows
-- Comprehensive unit test coverage (75 tests)
+- Comprehensive unit test coverage (98 tests)
 
 #### Features
+
+**Controls:**
+- **LicenseExpander** - Expandable card for displaying license text, with automatic resource loading from pack:// URIs
+
+**Effects:**
+- **InvertEffect** - Pixel shader that inverts element colors, useful for making dark-on-light images visible in dark themes
 
 **Design System:**
 - **Design Tokens** - Centralized spacing, sizing, colors, and typography
@@ -35,6 +43,7 @@ A reusable WPF component library providing:
 - **IndexToVisibilityConverter** - Show/hide based on index match (supports pipe-separated indices)
 
 **Helpers:**
+- **ApplicationInfoHelper** - Static methods for reading version, copyright, and product name from assembly attributes
 - **CopyTextBoxHelper** - Attached property for copy-to-clipboard functionality on read-only textboxes
 - **RelayCommand** - Simple ICommand implementation for MVVM patterns
 
@@ -120,7 +129,7 @@ dotnet test
 Test project: `test/ZBitSystems.Wpf.UI.Tests/`
 - Framework: NUnit 4.3.2
 - Mocking: Moq 4.20.72
-- Coverage: 75 tests covering converters, helpers, localization, window management, and theme management
+- Coverage: 98 tests covering controls, converters, effects, helpers, localization, window management, and theme management
 
 ### Versioning
 Version is managed in `Directory.Build.props`. Update `VersionPrefix` for new releases.
