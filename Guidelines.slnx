@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/ZBitSystems.Wpf.UI/ZBitSystems.Wpf.UI.csproj" />
   </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/ZBitSystems.Wpf.UI.Tests/ZBitSystems.Wpf.UI.Tests.csproj" />
+  </Folder>
 </Solution>

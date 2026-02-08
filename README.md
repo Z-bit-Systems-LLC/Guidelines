@@ -11,15 +11,29 @@ This repository contains shared company guidelines and reusable WPF components f
 ### Shared WPF Library (`src/ZBitSystems.Wpf.UI/`)
 A reusable WPF component library providing:
 - **Design System** - Consistent styling and design tokens
+- **Converters** - Generic value converters for data binding
 - **Helpers** - Utility classes for common WPF scenarios
 - Built on WPF-UI 4.2.0
 - Targets .NET 10.0-windows
+- Comprehensive unit test coverage (39 tests)
 
 #### Features
+
+**Design System:**
 - **Design Tokens** - Centralized spacing, sizing, colors, and typography
 - **Semantic Colors** - Theme-aware color system with automatic light/dark mode support
 - **Component Styles** - Pre-styled controls (buttons, textboxes, cards, badges, etc.)
+
+**Converters:**
+- **BooleanToVisibilityConverter** - Convert bool to Visibility with optional invert parameter
+- **InverseBoolConverter** - Invert boolean values
+- **NullToVisibilityConverter** - Show/hide based on null check
+- **StringToVisibilityConverter** - Show/hide based on string match (supports semicolon-separated values)
+- **IndexToVisibilityConverter** - Show/hide based on index match (supports pipe-separated indices)
+
+**Helpers:**
 - **CopyTextBoxHelper** - Attached property for copy-to-clipboard functionality on read-only textboxes
+- **RelayCommand** - Simple ICommand implementation for MVVM patterns
 
 ## Usage
 
@@ -60,6 +74,21 @@ In your `App.xaml`:
 </Application.Resources>
 ```
 
+### Using Converters
+Add namespace in your XAML:
+```xml
+xmlns:converters="clr-namespace:ZBitSystems.Wpf.UI.Converters;assembly=ZBitSystems.Wpf.UI"
+```
+
+Use in bindings:
+```xml
+<Page.Resources>
+    <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+</Page.Resources>
+
+<TextBlock Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVis}}" />
+```
+
 ### Using Components
 See `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md` for:
 - Available styles and their usage
@@ -74,11 +103,22 @@ See `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md` for:
 dotnet build Guidelines.slnx
 ```
 
+### Testing
+Run unit tests:
+```bash
+dotnet test
+```
+
+Test project: `test/ZBitSystems.Wpf.UI.Tests/`
+- Framework: NUnit 4.3.2
+- Mocking: Moq 4.20.72
+- Coverage: 39 tests covering all converters and helpers
+
 ### Versioning
 Version is managed in `Directory.Build.props`. Update `VersionPrefix` for new releases.
 
 ## License
-Eclipse Public License 2.0 (EPL-2.0)
+Apache License 2.0
 
 ## Contributing
 This is an internal Z-bit Systems repository. For questions or contributions, contact the development team.
