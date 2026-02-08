@@ -2,23 +2,51 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Design Tokens for OSDP Bench -->
-    
-    <!-- Spacing System (8px grid) -->
+    <!-- Design Tokens for Z-bit Systems Applications -->
+
+    <!-- =================================================================
+         WPF TYPE COMPATIBILITY GUIDE
+
+         Double (system:Double):  FontSize, Width/Height on elements, Opacity
+         Thickness:               Margin, Padding, BorderThickness
+         GridLength:              ColumnDefinition.Width, RowDefinition.Height
+         CornerRadius:            Border.CornerRadius
+
+         NOTE: WPF does NOT auto-convert between these types at runtime.
+         Using a Double resource for a Thickness property (e.g. Spacing.Large
+         as Margin) will compile but throw XamlParseException at runtime.
+         ================================================================= -->
+
+    <!-- Spacing Scale (8px grid) - Type: Double -->
+    <!-- Use for: FontSize overrides, element Width/Height, calc reference -->
     <system:Double x:Key="Spacing.XSmall">4</system:Double>
     <system:Double x:Key="Spacing.Small">8</system:Double>
     <system:Double x:Key="Spacing.Medium">16</system:Double>
     <system:Double x:Key="Spacing.Large">24</system:Double>
     <system:Double x:Key="Spacing.XLarge">32</system:Double>
     <system:Double x:Key="Spacing.XXLarge">48</system:Double>
-    
-    <!-- Standard Margins -->
+
+    <!-- Uniform Thickness Scale - Type: Thickness -->
+    <!-- Use for: Margin, Padding where all sides are equal -->
+    <Thickness x:Key="Thickness.XSmall">4</Thickness>
+    <Thickness x:Key="Thickness.Small">8</Thickness>
+    <Thickness x:Key="Thickness.Medium">16</Thickness>
+    <Thickness x:Key="Thickness.Large">24</Thickness>
+    <Thickness x:Key="Thickness.XLarge">32</Thickness>
+
+    <!-- Grid Gutter Widths - Type: GridLength -->
+    <!-- Use for: ColumnDefinition.Width, RowDefinition.Height spacer columns/rows -->
+    <GridLength x:Key="Gutter.Small">8</GridLength>
+    <GridLength x:Key="Gutter.Medium">16</GridLength>
+    <GridLength x:Key="Gutter.Large">24</GridLength>
+
+    <!-- Standard Margins - Type: Thickness -->
     <Thickness x:Key="Margin.Card">10,5</Thickness>
     <Thickness x:Key="Margin.Control">0,0,16,0</Thickness>
     <Thickness x:Key="Margin.Button">8,4</Thickness>
     <Thickness x:Key="Margin.Section">0,0,0,16</Thickness>
-    
-    <!-- Standard Padding -->
+
+    <!-- Standard Padding - Type: Thickness -->
     <Thickness x:Key="Padding.Card">16</Thickness>
     <Thickness x:Key="Padding.Control">8,4</Thickness>
     <Thickness x:Key="Padding.Button">16,8</Thickness>
