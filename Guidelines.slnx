@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZBitSystems.Wpf.UI/ZBitSystems.Wpf.UI.csproj" />
+  </Folder>
+</Solution>
