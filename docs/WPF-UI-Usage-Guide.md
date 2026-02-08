@@ -300,11 +300,25 @@ public partial class MainWindow : Window
 }
 ```
 
+### Step 3: Handle DPI Changes
+
+Override `OnDpiChanged` to fix rendering glitches when moving between monitors with different DPI settings:
+
+```csharp
+protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+{
+    base.OnDpiChanged(oldDpi, newDpi);
+    _windowStateManager.HandleDpiChanged();
+}
+```
+
+This forces a visual refresh of the window and its content, preventing layout artifacts during DPI transitions.
+
 ### Features
 
 The manager automatically handles:
 - **Multi-monitor configurations** - Works correctly when displays are added/removed
-- **DPI scaling** - Handles high-DPI displays correctly
+- **DPI change handling** - Forces visual refresh during monitor DPI transitions
 - **Position clamping** - Ensures windows remain accessible and visible
 - **Smart centering** - Centers window when saved position is invalid
 - **Normal bounds preservation** - Saves normal (non-maximized) bounds when window is maximized

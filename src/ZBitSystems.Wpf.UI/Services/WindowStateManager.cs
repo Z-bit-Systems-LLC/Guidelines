@@ -87,6 +87,31 @@ public class WindowStateManager
     }
 
     /// <summary>
+    /// Handles DPI changes by forcing a visual refresh of the window and its content.
+    /// Call this from your window's <c>OnDpiChanged</c> override to fix rendering glitches
+    /// that occur when moving between monitors with different DPI settings.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+    /// {
+    ///     base.OnDpiChanged(oldDpi, newDpi);
+    ///     _windowStateManager.HandleDpiChanged();
+    /// }
+    /// </code>
+    /// </example>
+    public void HandleDpiChanged()
+    {
+        _window.InvalidateVisual();
+
+        if (_window.Content is FrameworkElement content)
+        {
+            content.InvalidateMeasure();
+            content.InvalidateArrange();
+        }
+    }
+
+    /// <summary>
     /// Saves the current window state to storage.
     /// Should be called when the window is closing.
     /// </summary>

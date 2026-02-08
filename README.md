@@ -49,7 +49,7 @@ A reusable WPF component library providing:
 - **WindowStateManager** - Manages window position, size, and maximized state
   - Multi-monitor support with smart positioning
   - Ensures windows remain accessible across monitor configuration changes
-  - Handles DPI scaling correctly
+  - DPI change handling for smooth multi-monitor transitions
 
 **Theme Management:**
 - **ThemeManager** - Automatically follows Windows OS theme settings
