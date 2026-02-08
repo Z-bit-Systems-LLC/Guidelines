@@ -13,9 +13,10 @@ A reusable WPF component library providing:
 - **Design System** - Consistent styling and design tokens
 - **Converters** - Generic value converters for data binding
 - **Helpers** - Utility classes for common WPF scenarios
+- **Localization** - Interface-based abstraction for multi-language support
 - Built on WPF-UI 4.2.0
 - Targets .NET 10.0-windows
-- Comprehensive unit test coverage (39 tests)
+- Comprehensive unit test coverage (56 tests)
 
 #### Features
 
@@ -34,6 +35,12 @@ A reusable WPF component library providing:
 **Helpers:**
 - **CopyTextBoxHelper** - Attached property for copy-to-clipboard functionality on read-only textboxes
 - **RelayCommand** - Simple ICommand implementation for MVVM patterns
+
+**Localization:**
+- **ILocalizationProvider** - Interface for implementing custom resource providers
+- **LocalizationService** - Static service for managing the localization provider
+- **LocalizeExtension** - XAML markup extension for accessing localized resources
+- **LocalizedStringBinding** - Dynamic binding that updates when culture changes
 
 ## Usage
 
@@ -89,6 +96,67 @@ Use in bindings:
 <TextBlock Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVis}}" />
 ```
 
+### Using Localization
+
+The localization system provides an interface-based abstraction that allows applications to implement their own resource management strategy.
+
+**Step 1: Implement ILocalizationProvider**
+
+Create a provider that implements the interface:
+```csharp
+using System.ComponentModel;
+using System.Globalization;
+using ZBitSystems.Wpf.UI.Localization;
+
+public class ResourceLocalizationProvider : ILocalizationProvider
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string CurrentCulture => CultureInfo.CurrentUICulture.Name;
+
+    public string GetString(string key)
+    {
+        // Your resource lookup logic (e.g., ResourceManager, database, etc.)
+        return Resources.ResourceManager.GetString(key) ?? $"[{key}]";
+    }
+
+    public void ChangeCulture(CultureInfo culture)
+    {
+        // Update culture and notify listeners
+        CultureInfo.CurrentUICulture = culture;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+    }
+}
+```
+
+**Step 2: Register Provider at Startup**
+
+In your `App.xaml.cs`:
+```csharp
+protected override void OnStartup(StartupEventArgs e)
+{
+    base.OnStartup(e);
+
+    // Set the localization provider before any windows are shown
+    LocalizationService.Provider = new ResourceLocalizationProvider();
+}
+```
+
+**Step 3: Use in XAML**
+
+Add namespace:
+```xml
+xmlns:localization="clr-namespace:ZBitSystems.Wpf.UI.Localization;assembly=ZBitSystems.Wpf.UI"
+```
+
+Use the markup extension:
+```xml
+<TextBlock Text="{localization:Localize Welcome_Message}" />
+<Button Content="{localization:Localize Button_Submit}" />
+```
+
+The bindings automatically update when the provider raises PropertyChanged, enabling dynamic language switching without restarting the application.
+
 ### Using Components
 See `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md` for:
 - Available styles and their usage
@@ -112,7 +180,7 @@ dotnet test
 Test project: `test/ZBitSystems.Wpf.UI.Tests/`
 - Framework: NUnit 4.3.2
 - Mocking: Moq 4.20.72
-- Coverage: 39 tests covering all converters and helpers
+- Coverage: 56 tests covering converters, helpers, and localization
 
 ### Versioning
 Version is managed in `Directory.Build.props`. Update `VersionPrefix` for new releases.
