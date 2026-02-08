@@ -264,7 +264,7 @@ The localization system provides an interface-based abstraction for multi-langua
 
 ### Step 1: Implement ILocalizationProvider
 
-Create a provider that implements the interface:
+Create a provider in your UI project that adapts your application's resource system to the `ILocalizationProvider` interface. The provider subscribes to culture-change notifications from your resources and re-raises them so the XAML bindings update automatically:
 
 ```csharp
 using System.ComponentModel;
@@ -273,36 +273,46 @@ using ZBitSystems.Wpf.UI.Localization;
 
 public class ResourceLocalizationProvider : ILocalizationProvider
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public string CurrentCulture => CultureInfo.CurrentUICulture.Name;
+    public ResourceLocalizationProvider()
+    {
+        // Forward culture-change notifications from the static Resources class
+        MyApp.Core.Resources.Resources.PropertyChanged += OnResourcesPropertyChanged;
+    }
 
     public string GetString(string key)
     {
-        // Your resource lookup logic (e.g., ResourceManager, database, etc.)
-        return Resources.ResourceManager.GetString(key) ?? $"[{key}]";
+        return MyApp.Core.Resources.Resources.GetString(key);
     }
 
-    public void ChangeCulture(CultureInfo culture)
+    public string CurrentCulture =>
+        MyApp.Core.Resources.Resources.Culture?.Name ?? CultureInfo.CurrentUICulture.Name;
+
+    private void OnResourcesPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        // Update culture and notify listeners
-        CultureInfo.CurrentUICulture = culture;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }
 ```
 
 ### Step 2: Register Provider at Startup
 
-In your `App.xaml.cs`:
+Set the provider after your host starts but before any UI is shown. If using the .NET Generic Host:
 
 ```csharp
-protected override void OnStartup(StartupEventArgs e)
-{
-    base.OnStartup(e);
+using ZBitSystems.Wpf.UI.Localization;
 
-    // Set the localization provider before any windows are shown
+private async void OnStartup(object sender, StartupEventArgs e)
+{
+    Host.Start();
+
+    // Register the localization provider before any windows are created
     LocalizationService.Provider = new ResourceLocalizationProvider();
+
+    // Apply saved culture preference
+    var localizationService = Host.Services.GetService<ILocalizationService>();
+    localizationService?.ChangeCulture(savedCulture);
 }
 ```
 
