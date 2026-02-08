@@ -14,9 +14,11 @@ A reusable WPF component library providing:
 - **Converters** - Generic value converters for data binding
 - **Helpers** - Utility classes for common WPF scenarios
 - **Localization** - Interface-based abstraction for multi-language support
+- **Window Management** - State persistence with multi-monitor support
+- **Theme Management** - Automatic Windows system theme following
 - Built on WPF-UI 4.2.0
 - Targets .NET 10.0-windows
-- Comprehensive unit test coverage (56 tests)
+- Comprehensive unit test coverage (75 tests)
 
 #### Features
 
@@ -41,6 +43,19 @@ A reusable WPF component library providing:
 - **LocalizationService** - Static service for managing the localization provider
 - **LocalizeExtension** - XAML markup extension for accessing localized resources
 - **LocalizedStringBinding** - Dynamic binding that updates when culture changes
+
+**Window Management:**
+- **IWindowStateStorage** - Interface for implementing window state persistence
+- **WindowStateManager** - Manages window position, size, and maximized state
+  - Multi-monitor support with smart positioning
+  - Ensures windows remain accessible across monitor configuration changes
+  - Handles DPI scaling correctly
+
+**Theme Management:**
+- **ThemeManager** - Automatically follows Windows OS theme settings
+  - Provides `IsDarkMode` property for theme-aware UI
+  - Raises `PropertyChanged` events when system theme changes
+  - Built on WPF-UI's ApplicationThemeManager
 
 ## Usage
 
@@ -157,6 +172,121 @@ Use the markup extension:
 
 The bindings automatically update when the provider raises PropertyChanged, enabling dynamic language switching without restarting the application.
 
+### Using Window State Management
+
+The window state manager persists window position, size, and maximized state across application sessions.
+
+**Step 1: Implement IWindowStateStorage**
+
+Create a storage adapter for your settings class:
+```csharp
+using ZBitSystems.Wpf.UI.Services;
+
+public class UserSettingsWindowStateAdapter : IWindowStateStorage
+{
+    private readonly UserSettings _settings;
+
+    public UserSettingsWindowStateAdapter(UserSettings settings)
+    {
+        _settings = settings;
+    }
+
+    public double WindowWidth
+    {
+        get => _settings.WindowWidth;
+        set => _settings.WindowWidth = value;
+    }
+
+    // Implement other properties: WindowHeight, WindowLeft, WindowTop, IsMaximized
+}
+```
+
+**Step 2: Use in Window Constructor**
+
+```csharp
+public MainWindow(IUserSettingsService userSettingsService)
+{
+    InitializeComponent();
+
+    var adapter = new UserSettingsWindowStateAdapter(userSettingsService.Settings);
+    var windowStateManager = new WindowStateManager(this, adapter);
+
+    // Restore window state before showing
+    windowStateManager.RestoreWindowState();
+
+    // Save state when closing
+    Closing += async (s, e) =>
+    {
+        windowStateManager.SaveWindowState();
+        await userSettingsService.SaveAsync();
+    };
+}
+```
+
+The manager automatically handles:
+- Multi-monitor configurations
+- DPI scaling
+- Window position clamping to keep windows accessible
+- Centering when saved position is invalid
+
+### Using Theme Management
+
+The theme manager automatically follows Windows OS theme settings (Light/Dark mode).
+
+**Basic Usage:**
+
+```csharp
+using ZBitSystems.Wpf.UI.Services;
+
+public class MyPage : INotifyPropertyChanged, IDisposable
+{
+    private readonly ThemeManager _themeManager;
+
+    public MyPage()
+    {
+        _themeManager = new ThemeManager();
+        _themeManager.PropertyChanged += OnThemeChanged;
+    }
+
+    public bool IsDarkMode => _themeManager.IsDarkMode;
+
+    private void OnThemeChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ThemeManager.IsDarkMode))
+        {
+            // Update UI when theme changes
+            OnPropertyChanged(nameof(IsDarkMode));
+        }
+    }
+
+    public void Dispose()
+    {
+        _themeManager.PropertyChanged -= OnThemeChanged;
+        _themeManager.Dispose();
+    }
+}
+```
+
+**In XAML:**
+
+```xml
+<Image Source="logo.png">
+    <Image.Style>
+        <Style TargetType="Image">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <InvertEffect />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Image.Style>
+</Image>
+```
+
 ### Using Components
 See `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md` for:
 - Available styles and their usage
@@ -180,7 +310,7 @@ dotnet test
 Test project: `test/ZBitSystems.Wpf.UI.Tests/`
 - Framework: NUnit 4.3.2
 - Mocking: Moq 4.20.72
-- Coverage: 56 tests covering converters, helpers, and localization
+- Coverage: 75 tests covering converters, helpers, localization, window management, and theme management
 
 ### Versioning
 Version is managed in `Directory.Build.props`. Update `VersionPrefix` for new releases.
