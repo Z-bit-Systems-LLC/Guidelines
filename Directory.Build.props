@@ -4,7 +4,7 @@
     <Company>Z-bit Systems LLC</Company>
     <Product>Z-bit Systems Shared Components</Product>
     <Copyright>Copyright © Z-bit Systems LLC</Copyright>
-    <PackageLicenseExpression>EPL-2.0</PackageLicenseExpression>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Z-bit-Systems-LLC/Guidelines.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/Z-bit-Systems-LLC/Guidelines</PackageProjectUrl>
