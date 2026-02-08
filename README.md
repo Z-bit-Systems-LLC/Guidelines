@@ -57,37 +57,35 @@ A reusable WPF component library providing:
   - Raises `PropertyChanged` events when system theme changes
   - Built on WPF-UI's ApplicationThemeManager
 
-## Usage
+## Quick Start
 
-### As a Git Submodule
-Add to your project:
+### Installation
+
+Add as a git submodule:
 ```bash
 git submodule add https://github.com/Z-bit-Systems-LLC/Guidelines.git lib/Guidelines
 git submodule update --init --recursive
 ```
 
-### Referencing the Library
-Add to your .sln:
+Add to your solution and project:
 ```bash
 dotnet sln add lib/Guidelines/src/ZBitSystems.Wpf.UI/ZBitSystems.Wpf.UI.csproj
 ```
 
-Add to your WPF project's .csproj:
 ```xml
+<!-- Add to your WPF project's .csproj -->
 <ProjectReference Include="..\..\lib\Guidelines\src\ZBitSystems.Wpf.UI\ZBitSystems.Wpf.UI.csproj" />
 ```
 
-### Using the Design System
-In your `App.xaml`:
+### Basic Setup
+
+Merge design system resources in your `App.xaml`:
 ```xml
 <Application.Resources>
     <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
-            <!-- WPF-UI Theme -->
             <ui:ThemesDictionary Theme="Dark"/>
             <ui:ControlsDictionary/>
-
-            <!-- Z-bit Systems Design System -->
             <ResourceDictionary Source="pack://application:,,,/ZBitSystems.Wpf.UI;component/Styles/DesignTokens.xaml"/>
             <ResourceDictionary Source="pack://application:,,,/ZBitSystems.Wpf.UI;component/Styles/ThemeSemanticColors.xaml"/>
             <ResourceDictionary Source="pack://application:,,,/ZBitSystems.Wpf.UI;component/Styles/ComponentStyles.xaml"/>
@@ -96,203 +94,15 @@ In your `App.xaml`:
 </Application.Resources>
 ```
 
-### Using Converters
-Add namespace in your XAML:
-```xml
-xmlns:converters="clr-namespace:ZBitSystems.Wpf.UI.Converters;assembly=ZBitSystems.Wpf.UI"
-```
+## Documentation
 
-Use in bindings:
-```xml
-<Page.Resources>
-    <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
-</Page.Resources>
-
-<TextBlock Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVis}}" />
-```
-
-### Using Localization
-
-The localization system provides an interface-based abstraction that allows applications to implement their own resource management strategy.
-
-**Step 1: Implement ILocalizationProvider**
-
-Create a provider that implements the interface:
-```csharp
-using System.ComponentModel;
-using System.Globalization;
-using ZBitSystems.Wpf.UI.Localization;
-
-public class ResourceLocalizationProvider : ILocalizationProvider
-{
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public string CurrentCulture => CultureInfo.CurrentUICulture.Name;
-
-    public string GetString(string key)
-    {
-        // Your resource lookup logic (e.g., ResourceManager, database, etc.)
-        return Resources.ResourceManager.GetString(key) ?? $"[{key}]";
-    }
-
-    public void ChangeCulture(CultureInfo culture)
-    {
-        // Update culture and notify listeners
-        CultureInfo.CurrentUICulture = culture;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
-    }
-}
-```
-
-**Step 2: Register Provider at Startup**
-
-In your `App.xaml.cs`:
-```csharp
-protected override void OnStartup(StartupEventArgs e)
-{
-    base.OnStartup(e);
-
-    // Set the localization provider before any windows are shown
-    LocalizationService.Provider = new ResourceLocalizationProvider();
-}
-```
-
-**Step 3: Use in XAML**
-
-Add namespace:
-```xml
-xmlns:localization="clr-namespace:ZBitSystems.Wpf.UI.Localization;assembly=ZBitSystems.Wpf.UI"
-```
-
-Use the markup extension:
-```xml
-<TextBlock Text="{localization:Localize Welcome_Message}" />
-<Button Content="{localization:Localize Button_Submit}" />
-```
-
-The bindings automatically update when the provider raises PropertyChanged, enabling dynamic language switching without restarting the application.
-
-### Using Window State Management
-
-The window state manager persists window position, size, and maximized state across application sessions.
-
-**Step 1: Implement IWindowStateStorage**
-
-Create a storage adapter for your settings class:
-```csharp
-using ZBitSystems.Wpf.UI.Services;
-
-public class UserSettingsWindowStateAdapter : IWindowStateStorage
-{
-    private readonly UserSettings _settings;
-
-    public UserSettingsWindowStateAdapter(UserSettings settings)
-    {
-        _settings = settings;
-    }
-
-    public double WindowWidth
-    {
-        get => _settings.WindowWidth;
-        set => _settings.WindowWidth = value;
-    }
-
-    // Implement other properties: WindowHeight, WindowLeft, WindowTop, IsMaximized
-}
-```
-
-**Step 2: Use in Window Constructor**
-
-```csharp
-public MainWindow(IUserSettingsService userSettingsService)
-{
-    InitializeComponent();
-
-    var adapter = new UserSettingsWindowStateAdapter(userSettingsService.Settings);
-    var windowStateManager = new WindowStateManager(this, adapter);
-
-    // Restore window state before showing
-    windowStateManager.RestoreWindowState();
-
-    // Save state when closing
-    Closing += async (s, e) =>
-    {
-        windowStateManager.SaveWindowState();
-        await userSettingsService.SaveAsync();
-    };
-}
-```
-
-The manager automatically handles:
-- Multi-monitor configurations
-- DPI scaling
-- Window position clamping to keep windows accessible
-- Centering when saved position is invalid
-
-### Using Theme Management
-
-The theme manager automatically follows Windows OS theme settings (Light/Dark mode).
-
-**Basic Usage:**
-
-```csharp
-using ZBitSystems.Wpf.UI.Services;
-
-public class MyPage : INotifyPropertyChanged, IDisposable
-{
-    private readonly ThemeManager _themeManager;
-
-    public MyPage()
-    {
-        _themeManager = new ThemeManager();
-        _themeManager.PropertyChanged += OnThemeChanged;
-    }
-
-    public bool IsDarkMode => _themeManager.IsDarkMode;
-
-    private void OnThemeChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(ThemeManager.IsDarkMode))
-        {
-            // Update UI when theme changes
-            OnPropertyChanged(nameof(IsDarkMode));
-        }
-    }
-
-    public void Dispose()
-    {
-        _themeManager.PropertyChanged -= OnThemeChanged;
-        _themeManager.Dispose();
-    }
-}
-```
-
-**In XAML:**
-
-```xml
-<Image Source="logo.png">
-    <Image.Style>
-        <Style TargetType="Image">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <InvertEffect />
-                        </Setter.Value>
-                    </Setter>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-    </Image.Style>
-</Image>
-```
-
-### Using Components
-See `src/ZBitSystems.Wpf.UI/Styles/StyleGuide.md` for:
-- Available styles and their usage
-- Design token reference
-- Component examples
-- Best practices
+📖 **[Complete Usage Guide](docs/WPF-UI-Usage-Guide.md)** - Comprehensive documentation covering:
+- Design System integration
+- Converters usage
+- Localization setup
+- Window State Management
+- Theme Management
+- Component styles and best practices
 
 ## Development
 
