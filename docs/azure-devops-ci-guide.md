@@ -7,6 +7,7 @@ This guide explains how to implement Azure DevOps CI/CD automation similar to th
 - [Overview](#overview)
 - [Git Branching Strategy](#git-branching-strategy)
 - [Project Structure](#project-structure)
+- [Working with Git Submodules](#working-with-git-submodules)
 - [Pipeline Configuration](#pipeline-configuration)
 - [Build Template](#build-template)
 - [Package Template](#package-template)
@@ -182,6 +183,79 @@ your-project/
 └── YourProject.sln
 ```
 
+## Working with Git Submodules
+
+If your project uses Git submodules (e.g., for shared libraries), Azure DevOps requires explicit configuration to checkout submodules during pipeline execution.
+
+### Enabling Submodule Checkout
+
+**Critical**: By default, Azure DevOps does NOT checkout submodules. You must add `submodules: true` to every `checkout` step:
+
+```yaml
+steps:
+  - checkout: self
+    submodules: true  # Recursively checkout all submodules
+```
+
+### Checkout Options
+
+| Option | Values | Description |
+|--------|--------|-------------|
+| `submodules` | `true`, `false`, `recursive` | Enable submodule checkout (`true` and `recursive` are equivalent) |
+| `persistCredentials` | `true`, `false` | Keep credentials for subsequent git commands |
+| `clean` | `true`, `false` | Delete untracked files before checkout |
+| `fetchDepth` | number | Shallow clone depth (default: no limit) |
+
+### Common Submodule Scenarios
+
+**Shared library as submodule:**
+```
+your-project/
+├── lib/
+│   └── SharedLibrary/  # Git submodule
+├── src/
+│   └── YourApp/
+│       └── YourApp.csproj  # References SharedLibrary
+└── ci/
+    └── azure-pipelines.yml  # Must enable submodules
+```
+
+**Multiple submodules:**
+```yaml
+- checkout: self
+  submodules: recursive  # Checks out nested submodules
+```
+
+### Troubleshooting Submodule Issues
+
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| Build fails with "project not found" | Submodule not checked out | Add `submodules: true` to checkout step |
+| Empty submodule directory | Missing submodule initialization | Verify `.gitmodules` file exists and is committed |
+| Authentication errors | Private submodule repository | Configure pipeline permissions or use PAT |
+| Old submodule version | Stale submodule reference | Update submodule: `git submodule update --remote` |
+
+### Local Development vs CI
+
+**Local development:**
+```bash
+# Initial clone with submodules
+git clone --recursive https://github.com/yourorg/yourproject.git
+
+# Or initialize after cloning
+git submodule update --init --recursive
+
+# Update submodules to latest
+git submodule update --remote
+```
+
+**Azure DevOps pipeline:**
+```yaml
+# Automatically handled with submodules: true
+- checkout: self
+  submodules: true
+```
+
 ## Pipeline Configuration
 
 ### Main Pipeline File (`ci/azure-pipelines.yml`)
@@ -213,6 +287,7 @@ jobs:
       vmImage: 'windows-latest'
     steps:
       - checkout: self
+        submodules: true  # Important: checkout Git submodules
       - template: build.yml
 
   # Package job only runs on version tags
@@ -224,6 +299,7 @@ jobs:
       build
     steps:
       - checkout: self
+        submodules: true  # Important: checkout Git submodules
         persistCredentials: true
         clean: true
       - template: package.yml
@@ -238,6 +314,7 @@ jobs:
 | Conditional packaging | `condition: and(succeeded(), startsWith(...))` |
 | Job dependencies | `dependsOn: build` |
 | Template reuse | `template: build.yml` |
+| Submodule checkout | `checkout: self` with `submodules: true` |
 
 ## Build Template
 
@@ -667,6 +744,8 @@ After a successful release build:
 | ReSharper not found | Ensure `dotnet tool install` step runs first |
 | Test projects not found | Check `projects` glob pattern matches your structure |
 | Artifacts not published | Verify `targetPath` points to correct directory |
+| Submodules not checked out | Add `submodules: true` to all `checkout: self` steps |
+| Build fails with missing references | Verify submodules are properly initialized and checked out |
 
 ### Debugging Pipeline Failures
 
