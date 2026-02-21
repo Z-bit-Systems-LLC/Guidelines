@@ -6,8 +6,12 @@ using System.Windows.Data;
 
 namespace ZBitSystems.Wpf.UI.Converters;
 
+/// <summary>
+/// Converts a string value to a <see cref="Visibility"/> value by comparing against the converter parameter.
+/// </summary>
 public class StringToVisibilityConverter : IValueConverter
 {
+    /// <inheritdoc />
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (parameter is string paramString && paramString.Contains(';'))
@@ -23,6 +27,7 @@ public class StringToVisibilityConverter : IValueConverter
         return value?.ToString() == parameter?.ToString() ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    /// <inheritdoc />
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotImplementedException();

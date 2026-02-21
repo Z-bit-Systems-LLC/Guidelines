@@ -5,8 +5,12 @@ using System.Windows.Data;
 
 namespace ZBitSystems.Wpf.UI.Converters;
 
+/// <summary>
+/// Converts a boolean value to a <see cref="Visibility"/> value, with optional inversion via the converter parameter.
+/// </summary>
 public class BooleanToVisibilityConverter : IValueConverter
 {
+    /// <inheritdoc />
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is bool booleanValue)
@@ -22,6 +26,7 @@ public class BooleanToVisibilityConverter : IValueConverter
         return Visibility.Collapsed; // Default
     }
 
+    /// <inheritdoc />
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is Visibility visibilityValue)

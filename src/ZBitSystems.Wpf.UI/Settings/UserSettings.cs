@@ -1,6 +1,6 @@
-namespace ZBitSystems.Wpf.UI.Settings;
-
 using ZBitSystems.Wpf.UI.Services;
+
+namespace ZBitSystems.Wpf.UI.Settings;
 
 /// <summary>
 /// Base settings class that implements <see cref="IWindowStateStorage"/> directly,

@@ -16,6 +16,7 @@ public class JsonUserSettingsService<T> : IUserSettingsService<T> where T : User
 {
     private const string SettingsFileName = "settings.json";
 
+    // ReSharper disable once StaticMemberInGenericType — Intentionally per-closed-generic-type
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     private readonly string _settingsFilePath;
