@@ -64,6 +64,38 @@
         <Setter Property="Foreground" Value="{DynamicResource SemanticInfoBrush}"/>
     </Style>
     
+    <!-- Page Message Styles (centered status/info messages) -->
+    <Style x:Key="Text.PageMessage" TargetType="TextBlock" BasedOn="{StaticResource Text.Warning}">
+        <Setter Property="Margin" Value="{StaticResource Margin.PageMessage}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Headline}"/>
+    </Style>
+
+    <Style x:Key="Text.PageMessage.Detail" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+        <Setter Property="Margin" Value="{StaticResource Margin.PageMessage}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Title}"/>
+    </Style>
+
+    <!-- Statistics Display Styles -->
+    <Style x:Key="Text.Stat.Label" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Caption}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="Text.Stat.Value" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Headline}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Margin" Value="0,5,0,0"/>
+    </Style>
+
     <!-- Page Layout Styles -->
     <Style x:Key="Page.Title" TargetType="TextBlock" BasedOn="{StaticResource Text.Display}">
         <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -201,7 +233,7 @@
     </Style>
     
     <Style x:Key="Section.Header" TargetType="ui:TextBlock">
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSize.BodyLarge}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Margin" Value="0,0,0,12"/>
         <Setter Property="TextWrapping" Value="Wrap"/>

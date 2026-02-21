@@ -45,6 +45,8 @@
     <Thickness x:Key="Margin.Control">0,0,16,0</Thickness>
     <Thickness x:Key="Margin.Button">8,4</Thickness>
     <Thickness x:Key="Margin.Section">0,0,0,16</Thickness>
+    <Thickness x:Key="Margin.PageMessage">20,10,20,0</Thickness>
+    <Thickness x:Key="Margin.ContentCenter">10,0,10,0</Thickness>
 
     <!-- Standard Padding - Type: Thickness -->
     <Thickness x:Key="Padding.Card">16</Thickness>

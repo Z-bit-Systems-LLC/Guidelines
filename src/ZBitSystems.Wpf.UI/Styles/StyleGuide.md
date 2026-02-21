@@ -20,11 +20,14 @@ Foundation values for spacing, typography, colors, and sizing.
 
 #### Standard Margins & Padding
 ```xml
-{StaticResource Margin.Card}       <!-- 10,5 -->
-{StaticResource Margin.Control}    <!-- 0,0,16,0 -->
-{StaticResource Margin.Button}     <!-- 8,4 -->
-{StaticResource Padding.Card}      <!-- 16 -->
-{StaticResource Padding.Control}   <!-- 8,4 -->
+{StaticResource Margin.Card}          <!-- 10,5 -->
+{StaticResource Margin.Control}       <!-- 0,0,16,0 -->
+{StaticResource Margin.Button}        <!-- 8,4 -->
+{StaticResource Margin.Section}       <!-- 0,0,0,16 -->
+{StaticResource Margin.PageMessage}   <!-- 20,10,20,0 (centered page messages) -->
+{StaticResource Margin.ContentCenter} <!-- 10,0,10,0 (horizontally centered content) -->
+{StaticResource Padding.Card}         <!-- 16 -->
+{StaticResource Padding.Control}      <!-- 8,4 -->
 ```
 
 #### Typography Scale
@@ -56,6 +59,14 @@ Reusable styles for UI components.
 <TextBlock Style="{StaticResource Text.Error}" Text="Error message"/>
 <TextBlock Style="{StaticResource Text.Warning}" Text="Warning"/>
 <TextBlock Style="{StaticResource Text.Success}" Text="Success"/>
+
+<!-- Page-level centered messages (e.g., disconnected/error states) -->
+<TextBlock Style="{StaticResource Text.PageMessage}" Text="Device Not Connected"/>
+<TextBlock Style="{StaticResource Text.PageMessage.Detail}" Text="Go to Connect page"/>
+
+<!-- Statistics labels and values (e.g., dashboard counters) -->
+<TextBlock Style="{StaticResource Text.Stat.Label}" Text="Commands Sent"/>
+<TextBlock Style="{StaticResource Text.Stat.Value}" Text="1,234"/>
 ```
 
 #### Form Controls
