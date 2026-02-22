@@ -87,6 +87,29 @@ Reusable styles for UI components.
 <ui:NumberBox Style="{StaticResource NumberBox.Standard}"/>
 ```
 
+#### Validation
+```xml
+<!-- Validation error text (e.g., character count that turns red when invalid) -->
+<TextBlock Style="{StaticResource Text.Validation.Error}" Text="16/32"/>
+
+<!-- Recommended inline error border pattern using SemanticErrorBrush -->
+<TextBox>
+    <TextBox.Style>
+        <Style TargetType="TextBox" BasedOn="{StaticResource TextBox.Standard}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsInvalid}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SemanticErrorBrush}"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </TextBox.Style>
+</TextBox>
+```
+
+**Validation Styles:**
+- `Text.Validation.Error` - Caption-sized text in error color, suitable for field-level validation messages or character counts
+
 #### Buttons
 ```xml
 <!-- Primary actions -->

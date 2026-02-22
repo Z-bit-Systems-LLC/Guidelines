@@ -46,7 +46,12 @@
         <Setter Property="FontSize" Value="{StaticResource FontSize.Caption}"/>
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
     </Style>
-    
+
+    <Style x:Key="Text.Validation.Error" TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+        <Setter Property="Foreground" Value="{DynamicResource SemanticErrorBrush}"/>
+        <Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+
     <!-- Status Text Styles -->
     <Style x:Key="Text.Success" TargetType="TextBlock" BasedOn="{StaticResource Text.Body}">
         <Setter Property="Foreground" Value="{DynamicResource SemanticSuccessBrush}"/>
