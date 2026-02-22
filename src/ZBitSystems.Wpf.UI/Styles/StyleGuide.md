@@ -122,6 +122,42 @@ Reusable styles for UI components.
 <ui:Button Style="{StaticResource Button.Transparent}" Content="Browse"/>
 ```
 
+#### Segmented Toggle Buttons
+Use for switching between two or more mutually exclusive options (e.g., Temporary/Permanent, Discover/Manual). Uses `RadioButton` with a custom template for theme-aware styling.
+
+```xml
+<!-- Segmented toggle pair -->
+<StackPanel Orientation="Horizontal">
+    <RadioButton Content="Option A"
+                 GroupName="MyGroup"
+                 IsChecked="True"
+                 Style="{StaticResource ToggleButton.Segmented}" />
+    <RadioButton Content="Option B"
+                 GroupName="MyGroup"
+                 Style="{StaticResource ToggleButton.Segmented}"
+                 Margin="4,0,0,0" />
+</StackPanel>
+
+<!-- With data binding -->
+<StackPanel Orientation="Horizontal">
+    <RadioButton Content="Discover"
+                 IsChecked="{Binding IsDiscoverMode, Mode=TwoWay}"
+                 GroupName="ConnectMode"
+                 Style="{StaticResource ToggleButton.Segmented}" />
+    <RadioButton Content="Manual"
+                 IsChecked="{Binding IsDiscoverMode, Converter={StaticResource InverseBoolConverter}}"
+                 GroupName="ConnectMode"
+                 Style="{StaticResource ToggleButton.Segmented}"
+                 Margin="4,0,0,0" />
+</StackPanel>
+```
+
+**Visual States:**
+- **Unselected**: Default control background with primary text
+- **Hover**: Secondary fill background
+- **Selected (checked)**: Light accent background (`AccentFillColorTertiaryBrush`)
+- **Disabled**: 50% opacity
+
 #### Badges
 Status badges for displaying security states and status indicators.
 
